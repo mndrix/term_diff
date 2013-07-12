@@ -1,12 +1,8 @@
 :- use_module(library(term_diff)).
 :- use_module(library(apply), [maplist/2]).
 
-register_test(Test) :-
-    ignore(term_expansion(Test, _)).
-
 % macro to generate goals for all three term_diff/3 modes
-:- op(1050, xfy, =>).
-term_expansion(Name => term_diff(A,Diff,B),Tests) :-
+term_expansion(Name -> term_diff(A,Diff,B),Tests) :-
     atom_concat(Name, ' (-,+,+)', DashPlusPlus),
     atom_concat(Name, ' (+,-,+)', PlusDashPlus),
     atom_concat(Name, ' (+,+,-)', PlusPlusDash),
@@ -24,31 +20,31 @@ term_expansion(Name => term_diff(A,Diff,B),Tests) :-
             X = B
         )
     ],
-    maplist(register_test,Tests).
+    maplist(tap:register_test, [DashPlusPlus,PlusDashPlus,PlusPlusDash]).
 
 :- use_module(library(tap)).
 
 % add tests showing common usage
-'atomic with two integers' =>
+'atomic with two integers' ->
     term_diff(1, atomic(1,2), 2).
 
-'atomic with two floats' =>
+'atomic with two floats' ->
     term_diff(1.3, atomic(1.3,97.4), 97.4).
 
-'atomic with different types' =>
+'atomic with different types' ->
     term_diff(1.0, atomic(1.0,1), 1).
 
-'changing atoms' =>
+'changing atoms' ->
     term_diff(a, name(a,b), b).
 
-'changing functor names' =>
+'changing functor names' ->
     term_diff(a(first), name(a,b), b(first)).
 
-'dropping a term''s first argument' =>
+'dropping a term''s first argument' ->
     term_diff(a(first,second), drop_arg(1,first), a(second)).
 
-'dropping a term''s trailing argument' =>
+'dropping a term''s trailing argument' ->
     term_diff(a(first,second), drop_arg(2,second), a(first)).
 
-'dropping a term''s internal argument' =>
+'dropping a term''s internal argument' ->
     term_diff(a(first,second,third), drop_arg(2,second), a(first,third)).
