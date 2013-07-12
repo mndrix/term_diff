@@ -77,3 +77,9 @@ term_expansion(Name -> term_diff(A,Diff,B),Tests) :-
                ]
              , n(one,two,three)
              ).
+
+'recursive, compound terms' ->
+    term_diff( a(b(zwei))
+             , arg(1, arg(1, alter(zwei, two)))
+             , a(b(two))
+             ).
