@@ -25,14 +25,17 @@ term_expansion(Name -> term_diff(A,Diff,B),Tests) :-
 :- use_module(library(tap)).
 
 % add tests showing common usage
-'atomic with two integers' ->
-    term_diff(1, atomic(1,2), 2).
+'alter with two integers' ->
+    term_diff(1, alter(1,2), 2).
 
-'atomic with two floats' ->
-    term_diff(1.3, atomic(1.3,97.4), 97.4).
+'alter with two floats' ->
+    term_diff(1.3, alter(1.3,97.4), 97.4).
 
-'atomic with different types' ->
-    term_diff(1.0, atomic(1.0,1), 1).
+'alter with different types' ->
+    term_diff(1.0, alter(1.0,1), 1).
+
+'alter with nothing shared' ->
+    term_diff(a(1), alter(a(1), b(2)), b(2)).
 
 'changing atoms' ->
     term_diff(a, name(a,b), b).

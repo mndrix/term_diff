@@ -1,21 +1,10 @@
 :- module(term_diff, [term_diff/3]).
-:- use_module(library(lcs), [lcs/3]).
+:- use_module(library(lcs), [lcs/3, lcs/5]).
 :- use_module(library(when), [when/2]).
 
-term_diff(A, atomic(A,B), B) :-
-    dif(TypeA, TypeB),
-    term_type(A, TypeA),
-    term_type(B, TypeB),
-    !.
-term_diff(A, atomic(A,B), B) :-
-    dif(A, B),
-    term_type(A, Type),
-    term_type(B, Type),
-    memberchk(Type,[integer,float]),
-    !.
 term_diff(A, name(NameA,NameB), B) :-
-    term_type(A, callable),
-    term_type(B, callable),
+    lazy_callable(A),
+    lazy_callable(B),
     dif(NameA, NameB),
     lazy_univ(A, NameA, Arguments),
     lazy_univ(B, NameB, Arguments),
@@ -45,17 +34,16 @@ term_diff(A, Diffs, B) :-
 term_diff(A, Diffs, B) :-
     % calculate a list of diffs
     var(Diffs),
-    nonvar(A),
-    nonvar(B),
-    !,
+    callable(A),
+    callable(B),
     A =.. ListA,
     B =.. ListB,
     lcs(ListA, ListB, LCS),
-    ( LCS = [] ->
-        Diffs = atomic(A,B)
-    ; % otherwise ->
-        lcs_diff(LCS, 0, ListA, ListB, Diffs)
-    ).
+    LCS \= [],
+    !,
+    lcs_diff(LCS, 0, ListA, ListB, Diffs).
+term_diff(A, alter(A,B), B) :-
+    dif(A,B).
 
 % construct a diff for two lists given one of their longest common
 % subsequences
@@ -89,25 +77,16 @@ lcs_diff([X|LCS], N0, [X|Left], [R|Right], [add_arg(N0,R)|Diffs]) :-
 
 % generalization for drop_arg/2 and add_arg/2 patches
 term_nth1(A, N, Arg, B) :-
-    term_type(A, callable),
-    term_type(B, callable),
+    lazy_callable(A),
+    lazy_callable(B),
     lazy_univ(A, Name, ArgsA),
     lazy_univ(B, Name, ArgsB),
     nth1(N, ArgsA, Arg, ArgsB).
 
 
-term_type(X, Type) :-
-    var(X),
-    !,
-    when(nonvar(X), term_type(X, Type)).
-term_type(X, integer) :-
-    integer(X),
-    !.
-term_type(X, float) :-
-    float(X),
-    !.
-term_type(X, callable) :-
-    callable(X).
+lazy_callable(X) :-
+    when(nonvar(X), callable(X)).
+
 
 % lazy_univ(Term, Name, Arguments)
 %
