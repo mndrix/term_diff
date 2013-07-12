@@ -42,9 +42,35 @@ term_expansion(Name -> term_diff(A,Diff,B),Tests) :-
 
 'dropping a term''s first argument' ->
     term_diff(a(first,second), drop_arg(1,first), a(second)).
-
 'dropping a term''s trailing argument' ->
     term_diff(a(first,second), drop_arg(2,second), a(first)).
-
 'dropping a term''s internal argument' ->
     term_diff(a(first,second,third), drop_arg(2,second), a(first,third)).
+
+'add an initial argument' ->
+    term_diff(a(second), add_arg(1,first), a(first,second)).
+'add a trailing argument' ->
+    term_diff(a(first), add_arg(2,second), a(first,second)).
+'add an internal argument' ->
+    term_diff(a(first,third), add_arg(2,second), a(first,second,third)).
+
+'add argument to an atom' ->
+    term_diff(hello, add_arg(1,world), hello(world)).
+
+'identical integers' ->
+    term_diff(1, [], 1).
+'identical floats' ->
+    term_diff(4.2, [], 4.2).
+'identical atoms' ->
+    term_diff(howdy, [], howdy).
+'identical compound terms' ->
+    term_diff(once(upon,a,time), [], once(upon,a,time)).
+
+'sequential patches' ->
+    term_diff( n(one,zwei)
+             , [ drop_arg(2,zwei)
+               , add_arg(2,two)
+               , add_arg(3,three)
+               ]
+             , n(one,two,three)
+             ).
